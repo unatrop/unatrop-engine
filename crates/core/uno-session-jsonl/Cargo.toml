@@ -1,0 +1,22 @@
+[package]
+name = "uno-session-jsonl"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+harness = { package = "uno-harness", path = "../uno-harness" }
+protocol = { package = "uno-protocol", path = "../uno-protocol" }
+serde_json = { workspace = true }
+session = { package = "uno-session", path = "../uno-session" }
+
+[dev-dependencies]
+async-trait = { workspace = true }
+futures-util = { workspace = true }
+provider = { package = "uno-provider", path = "../uno-provider" }
+tempfile = "3"
+tool-core = { package = "uno-tools-core", path = "../../tools/uno-tools-core" }

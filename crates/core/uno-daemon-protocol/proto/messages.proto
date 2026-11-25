@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package uno.daemon.v1;
+
+import "common.proto";
+
+message ContentPart {
+  oneof kind {
+    string text = 1;
+    string reasoning = 2;
+    ImageUrl image_url = 3;
+  }
+}
+
+message ImageUrl {
+  string url = 1;
+  optional string detail = 2;
+}
+
+message ToolCall {
+  string id = 1;
+  string name = 2;
+  string arguments_json = 3;
+  optional string signature = 4;
+}
+
+message Message {
+  Role role = 1;
+  repeated ContentPart content = 2;
+  repeated ToolCall tool_calls = 3;
+  optional string tool_call_id = 4;
+}
+
+message Usage {
+  uint32 input_tokens = 1;
+  uint32 output_tokens = 2;
+  optional uint32 cached_tokens = 3;
+}
+
+message StreamEvent {
+  oneof event {
+    TextDelta text_delta = 1;
+    ReasoningDelta reasoning_delta = 2;
+    ToolCallDelta tool_call_delta = 3;
+    ThoughtSignature thought_signature = 4;
+    StreamFinished finished = 5;
+    StreamError error = 6;
+  }
+}
+
+message TextDelta {
+  string delta = 1;
+}
+
+message ReasoningDelta {
+  string delta = 1;
+}
+
+message ToolCallDelta {
+  uint64 index = 1;
+  optional string id = 2;
+  optional string name = 3;
+  string arguments_delta = 4;
+}
+
+message ThoughtSignature {
+  uint64 index = 1;
+  string signature = 2;
+}
+
+message StreamFinished {
+  FinishReason reason = 1;
+  optional Usage usage = 2;
+}
+
+message StreamError {
+  string message = 1;
+  bool retryable = 2;
+}

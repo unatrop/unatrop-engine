@@ -1,0 +1,97 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-linux:
+    name: Package unatropd (linux-x86_64)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Linux deps
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends mold pkg-config libasound2-dev
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build and archive unatropd
+        run: |
+          set -eu
+          cargo build --release -p uno-daemon --bin unatropd
+          mkdir -p dist/unatropd-linux-x86_64
+          cp target/release/unatropd dist/unatropd-linux-x86_64/
+          tar -czf dist/unatropd-linux-x86_64.tar.gz -C dist unatropd-linux-x86_64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unatropd-linux-x86_64
+          path: dist/unatropd-linux-x86_64.tar.gz
+
+  build-macos:
+    name: Package unatropd (macos-arm64)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build and archive unatropd
+        run: |
+          set -eu
+          cargo build --release -p uno-daemon --bin unatropd
+          mkdir -p dist/unatropd-macos-arm64
+          cp target/release/unatropd dist/unatropd-macos-arm64/
+          tar -czf dist/unatropd-macos-arm64.tar.gz -C dist unatropd-macos-arm64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unatropd-macos-arm64
+          path: dist/unatropd-macos-arm64.tar.gz
+
+  build-windows:
+    name: Package unatropd (windows-x86_64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build and archive unatropd
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          cargo build --release -p uno-daemon --bin unatropd
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force -Path dist\unatropd-windows-x86_64 | Out-Null
+          Copy-Item target\release\unatropd.exe dist\unatropd-windows-x86_64\
+          Compress-Archive -Path dist\unatropd-windows-x86_64 -DestinationPath dist\unatropd-windows-x86_64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unatropd-windows-x86_64
+          path: dist/unatropd-windows-x86_64.zip
+
+  release:
+    name: Publish GitHub Release
+    needs: [build-linux, build-macos, build-windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Prepare release files and checksums
+        run: |
+          mkdir -p release-files
+          cp artifacts/unatropd-linux-x86_64/unatropd-linux-x86_64.tar.gz release-files/
+          cp artifacts/unatropd-macos-arm64/unatropd-macos-arm64.tar.gz release-files/
+          cp artifacts/unatropd-windows-x86_64/unatropd-windows-x86_64.zip release-files/
+          (cd release-files && sha256sum * > SHA256SUMS.txt)
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: release-files/*

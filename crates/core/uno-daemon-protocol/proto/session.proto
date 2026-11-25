@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package uno.daemon.v1;
+
+import "common.proto";
+import "messages.proto";
+
+message CreateSessionRequest {
+  optional string session_id = 1;
+  optional string fork_from = 2;
+  optional string provider = 3;
+  optional string base_url = 4;
+  optional string api_key = 5;
+  string model = 6;
+  optional string workspace = 7;
+  optional string system_prompt = 8;
+  optional ApprovalMode approval_mode = 9;
+  repeated string skill_dirs = 10;
+  repeated string mcp_configs = 11;
+  optional uint64 max_provider_turns = 12;
+  optional uint64 context_cap_chars = 13;
+  optional uint64 max_input_tokens = 14;
+  optional uint64 max_output_tokens = 15;
+  optional uint64 max_total_tokens = 16;
+  optional bool llm_compaction = 17;
+  optional uint64 max_parallel_tools = 18;
+  optional bool prompt_cache = 19;
+  optional float temperature = 20;
+  optional uint32 max_tokens = 21;
+  optional ThinkingLevel thinking_level = 22;
+  bool disable_tools = 23;
+}
+
+message CreateSessionResponse {
+  string session_id = 1;
+  ContextProfile context_profile = 2;
+}
+
+message SessionSummary {
+  string session_id = 1;
+  string title = 2;
+  string model = 3;
+  string workspace = 4;
+  uint64 message_count = 5;
+  bool is_running = 6;
+  bool persisted = 7;
+  uint64 updated_at = 8;
+}
+
+message ListSessionsResponse {
+  repeated SessionSummary sessions = 1;
+}
+
+message HistoryResponse {
+  repeated Message messages = 1;
+}
+
+message TurnDiffResponse {
+  bool is_git_repo = 1;
+  string diff = 2;
+  repeated string changed_files = 3;
+}
+
+message RevertRequest {
+  repeated string files = 1;
+}
+
+message RevertResponse {
+  repeated string reverted_files = 1;
+}
+
+message SessionMetricsResponse {
+  uint64 turns = 1;
+  uint64 input_tokens = 2;
+  uint64 output_tokens = 3;
+  uint64 cached_tokens = 4;
+  double cache_hit_pct = 5;
+  uint64 compactions = 6;
+  uint64 tool_calls = 7;
+  uint64 tool_errors = 8;
+}

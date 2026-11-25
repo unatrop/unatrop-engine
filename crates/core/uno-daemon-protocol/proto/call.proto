@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package uno.daemon.v1;
+
+import "common.proto";
+
+enum CallState {
+  CALL_STATE_UNSPECIFIED = 0;
+  CALL_STATE_IDLE = 1;
+  CALL_STATE_LISTENING = 2;
+  CALL_STATE_THINKING = 3;
+  CALL_STATE_SPEAKING = 4;
+}
+
+message TtsSynthesizeRequest {
+  string text = 1;
+  optional string voice = 2;
+  optional string lang = 3;
+  optional string quality = 4;
+  optional string emotion = 5;
+}
+
+message TtsSynthesizeResponse {
+  uint64 utterance_id = 1;
+  uint32 sample_rate = 2;
+  // Mono 16-bit signed little-endian PCM samples.
+  bytes pcm_s16le = 3;
+  uint32 duration_ms = 4;
+}
+
+message CallClientMsg {
+  oneof msg {
+    StartCallCommand start = 1;
+    AudioFrameChunk audio = 2;
+    Empty commit = 3;
+    Empty cancel = 4;
+    Empty stop = 5;
+    SpeakTextCommand speak = 6;
+    Empty interrupt_tts = 7;
+    string attach_session = 8;
+  }
+}
+
+message StartCallCommand {
+  optional string language = 1;
+  optional string session_id = 2;
+  optional string voice = 3;
+  bool auto_speak = 4;
+}
+
+message SpeakTextCommand {
+  string text = 1;
+  optional string voice = 2;
+  optional string lang = 3;
+  optional uint64 tag = 4;
+}
+
+message AudioFrameChunk {
+  bytes pcm_s16le = 1;
+  uint32 sample_rate = 2;
+  uint32 channels = 3;
+}
+
+message CallServerMsg {
+  oneof msg {
+    Empty ready = 1;
+    float download_progress = 2;
+    Empty speech_started = 3;
+    string partial_transcript = 4;
+    string transcript = 5;
+    Empty clear_hypothesis = 6;
+    string error = 7;
+    CallState state = 8;
+    TtsAudioChunk tts_audio = 9;
+    Empty tts_clear = 10;
+  }
+}
+
+message TtsAudioChunk {
+  uint64 turn_id = 1;
+  uint64 seq = 2;
+  uint32 sample_rate = 3;
+  bytes pcm_s16le = 4;
+  uint32 duration_ms = 5;
+  uint32 text_chars = 6;
+  optional uint64 tag = 7;
+  bool is_final = 8;
+}

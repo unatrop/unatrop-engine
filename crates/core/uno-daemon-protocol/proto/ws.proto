@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package uno.daemon.v1;
+
+import "common.proto";
+import "messages.proto";
+
+message ClientMsg {
+  oneof msg {
+    SendCommand send = 1;
+    Empty cancel = 2;
+    ApproveCommand approve = 3;
+    Empty truncate_last_user_turn = 4;
+    SetHistoryCommand set_history = 5;
+    Empty reset_session = 6;
+    Empty ping = 7;
+  }
+}
+
+message SendCommand {
+  string text = 1;
+  bool voice_mode = 2;
+  optional string voice_locale = 3;
+}
+
+message ApproveCommand {
+  string request_id = 1;
+  ApprovalDecision decision = 2;
+}
+
+message SetHistoryCommand {
+  repeated Message messages = 1;
+}
+
+message ServerMsg {
+  oneof msg {
+    Empty started = 1;
+    StateEvent state = 2;
+    DeltaEvent delta = 3;
+    ToolStartedEvent tool_started = 4;
+    ToolDeltaEvent tool_delta = 5;
+    ToolFinishedEvent tool_finished = 6;
+    ApprovalRequiredEvent approval_required = 7;
+    MessageAppendedEvent message_appended = 8;
+    TurnLimitReachedEvent turn_limit_reached = 9;
+    PlanUpdatedEvent plan_updated = 10;
+    CompactedEvent compacted = 11;
+    CompletedEvent completed = 12;
+    ErrorEvent error = 13;
+    Empty pong = 14;
+  }
+}
+
+message StateEvent {
+  RunState state = 1;
+}
+
+message DeltaEvent {
+  StreamEvent event = 1;
+}
+
+message ToolStartedEvent {
+  string id = 1;
+  string name = 2;
+  string arguments_json = 3;
+}
+
+message ToolDeltaEvent {
+  string id = 1;
+  string name = 2;
+  string chunk = 3;
+}
+
+message ToolFinishedEvent {
+  string id = 1;
+  string name = 2;
+  string content = 3;
+  bool is_error = 4;
+}
+
+message ApprovalRequiredEvent {
+  string request_id = 1;
+  string tool_name = 2;
+  string arguments_json = 3;
+  string reason = 4;
+  string always_allow_target = 5;
+}
+
+message MessageAppendedEvent {
+  Message message = 1;
+}
+
+message TurnLimitReachedEvent {
+  uint64 max_turns = 1;
+}
+
+message PlanUpdatedEvent {
+  optional string explanation = 1;
+  repeated PlanStep steps = 2;
+}
+
+message CompactedEvent {
+  uint64 dropped_messages = 1;
+  uint64 estimated_tokens_after = 2;
+}
+
+message CompletedEvent {
+  repeated Message messages = 1;
+  optional FinishReason finish_reason = 2;
+  optional Usage usage = 3;
+}
+
+message ErrorEvent {
+  string message = 1;
+}

@@ -1,0 +1,124 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/core/uno-protocol",
+    "crates/core/uno-transport",
+    "crates/core/uno-reqwest-transport",
+    "crates/core/uno-provider",
+    "crates/providers/uno-provider-anthropic",
+    "crates/providers/uno-provider-openai",
+    "crates/providers/uno-provider-copilot",
+    "crates/providers/uno-provider-antigravity",
+    "crates/providers/uno-provider-opencode",
+    "crates/tools/uno-tools-core",
+    "crates/tools/uno-tools-browser",
+    "crates/tools/uno-tools-exec",
+    "crates/tools/uno-tools-fs",
+    "crates/tools/uno-tools-grep",
+    "crates/tools/uno-tools-web",
+    "crates/core/uno-harness",
+    "crates/core/uno-session",
+    "crates/core/uno-session-jsonl",
+    "crates/core/uno-mcp",
+    "crates/core/uno-skills",
+    "crates/core/uno-voice",
+    "crates/core/uno-daemon-protocol",
+    "apps/server",
+]
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/unatrop/unatrop-engine"
+
+
+[workspace.dependencies]
+async-trait = "0.1"
+bytes = "1"
+futures-util = "0.3"
+ogg = "0.9"
+opus-decoder = "0.1"
+prost = "0.13"
+prost-build = "0.13"
+protox = "0.7"
+reqwest = { version = "0.12", default-features = false, features = ["stream", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tokio = "1"
+tokio-tungstenite = { version = "0.26", features = ["rustls-tls-webpki-roots"] }
+tracing = "0.1"
+uuid = { version = "1", features = ["v4"] }
+
+[workspace.metadata.crates]
+uno-protocol = "core: shared wire types, events, and stream accumulators"
+uno-transport = "core: abstract HTTP/SSE transport traits"
+uno-reqwest-transport = "core: reqwest-based HTTP/SSE transport implementation"
+uno-provider = "core: provider traits, catalog, and HTTP helpers"
+uno-harness = "core: agent execution loop, compaction, and recovery"
+uno-session = "core: session state and history abstractions"
+uno-session-jsonl = "core: JSONL persistence backend for sessions"
+uno-provider-openai = "providers: OpenAI / OpenAI-compatible provider"
+uno-provider-anthropic = "providers: Anthropic Messages API provider"
+uno-provider-copilot = "providers: GitHub Copilot auth and provider"
+uno-provider-antigravity = "providers: Antigravity auth and provider"
+uno-provider-opencode = "providers: OpenCode provider"
+uno-tools-core = "tools: tool traits, registry, and approval policy"
+uno-tools-browser = "tools: host-agnostic browser tools and backend contract"
+uno-tools-fs = "tools: filesystem read/write/patch tools"
+uno-tools-grep = "tools: text search tools"
+uno-tools-exec = "tools: sandboxed shell/PTY execution tools"
+uno-tools-web = "tools: web search and safe HTML fetch tools"
+uno-mcp = "core: Model Context Protocol client and tool bridge"
+uno-skills = "core: skill discovery and loading"
+uno-voice = "core: audio pipeline, VAD, STT, TTS, and AEC"
+uno-daemon-protocol = "core: protobuf wire definitions for daemon RPC and voice"
+
+
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+[profile.dev.package.opus-decoder]
+opt-level = 3
+overflow-checks = false
+
+[profile.dev.package.ogg]
+opt-level = 3
+overflow-checks = false
+
+[profile.dev.package.rustls]
+opt-level = 3
+overflow-checks = false
+
+[profile.dev.package.nnnoiseless]
+opt-level = 3
+overflow-checks = false
+
+[profile.dev.package.rustfft]
+opt-level = 3
+overflow-checks = false
+
+[profile.dev.package.realfft]
+opt-level = 3
+overflow-checks = false
+
+[profile.dev.package.ndarray]
+opt-level = 3
+overflow-checks = false
+
+[profile.dev.package.transcribe-rs]
+opt-level = 3
+overflow-checks = false
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+uninlined_format_args = "warn"
+manual_let_else = "warn"
+redundant_closure_for_method_calls = "warn"

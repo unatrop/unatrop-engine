@@ -1,0 +1,18 @@
+[package]
+name = "uno-reqwest-transport"
+version = "0.1.0"
+edition = "2024"
+license.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+bytes = "1"
+futures-util = { workspace = true }
+http = "1"
+reqwest = { version = "0.12", default-features = false, features = ["stream", "rustls-tls"] }
+transport = { package = "uno-transport", path = "../uno-transport" }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt"] }
+[lints]
+workspace = true

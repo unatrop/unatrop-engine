@@ -1,0 +1,6 @@
+# Владельцы модулей по группам
+/crates/core/       @grovudev
+/crates/providers/  @grovudev
+/crates/tools/      @grovudev
+/apps/server/       @grovudev
+/.github/           @grovudev

@@ -1,0 +1,22 @@
+[package]
+name = "uno-provider-anthropic"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+bytes = "1"
+futures-util = { workspace = true }
+http = "1"
+provider = { package = "uno-provider", path = "../../core/uno-provider" }
+protocol = { package = "uno-protocol", path = "../../core/uno-protocol" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+transport = { package = "uno-transport", path = "../../core/uno-transport" }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt"] }

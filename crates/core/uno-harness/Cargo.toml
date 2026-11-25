@@ -1,0 +1,24 @@
+[package]
+name = "uno-harness"
+version = "0.1.0"
+edition = "2024"
+license.workspace = true
+
+[dependencies]
+async-stream = "0.3"
+async-trait = { workspace = true }
+futures-util = { workspace = true }
+protocol = { package = "uno-protocol", path = "../uno-protocol" }
+provider = { package = "uno-provider", path = "../uno-provider" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tool-core = { package = "uno-tools-core", path = "../../tools/uno-tools-core" }
+uno-mcp = { path = "../uno-mcp" }
+uno-skills = { path = "../uno-skills" }
+tokio = { workspace = true, features = ["io-util", "process", "rt", "sync", "time"] }
+thiserror = { workspace = true }
+[dev-dependencies]
+async-trait = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt"] }
+[lints]
+workspace = true

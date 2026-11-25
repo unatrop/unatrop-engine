@@ -1,0 +1,53 @@
+# Rust / Cargo
+target/
+**/*.rs.bk
+*.pdb
+
+# Packaging & release artifacts
+dist/
+release-files/
+artifacts/
+*.deb
+*.dmg
+*.AppImage
+*.msi
+*.nupkg
+
+# Logs, temp files & local runtime data
+*.log
+*.tmp
+*.bak
+.unatrop/
+
+# Secrets & local env
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.key
+*.pem
+*.ppk
+*.jks
+*-token.json
+daemon.token
+daemon.db*
+
+# Editors & IDEs
+.zed/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Mobile / Apple / JS subprojects
+.gradle/
+local.properties
+DerivedData/
+node_modules/
