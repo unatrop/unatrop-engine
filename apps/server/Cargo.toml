@@ -21,29 +21,31 @@ path = "src/main.rs"
 [dependencies]
 async-trait = { workspace = true }
 axum = { version = "0.8", features = ["ws"] }
+base64 = "0.22"
 bytes = { workspace = true }
 futures-util = { workspace = true }
+http = "1"
 ogg = { workspace = true }
 opus-decoder = { workspace = true }
 prost = { workspace = true }
+ring = "0.17"
 rusqlite = { version = "0.32", features = ["bundled"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
-tokio = { workspace = true, features = ["macros", "rt-multi-thread", "signal", "sync"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "signal", "sync", "time"] }
 tokio-tungstenite = { workspace = true }
 tower-http = { version = "0.6", features = ["cors"] }
 tracing = { workspace = true }
-uuid = { workspace = true }
 uno-daemon-protocol = { path = "../../crates/core/uno-daemon-protocol" }
 uno-harness = { path = "../../crates/core/uno-harness" }
 uno-mcp = { path = "../../crates/core/uno-mcp", optional = true }
 uno-protocol = { path = "../../crates/core/uno-protocol" }
 uno-provider = { path = "../../crates/core/uno-provider" }
+uno-provider-anthropic = { path = "../../crates/providers/uno-provider-anthropic" }
 uno-provider-antigravity = { path = "../../crates/providers/uno-provider-antigravity" }
 uno-provider-copilot = { path = "../../crates/providers/uno-provider-copilot" }
 uno-provider-openai = { path = "../../crates/providers/uno-provider-openai" }
-uno-provider-opencode = { path = "../../crates/providers/uno-provider-opencode" }
 uno-reqwest-transport = { path = "../../crates/core/uno-reqwest-transport" }
 uno-session = { path = "../../crates/core/uno-session" }
 uno-session-jsonl = { path = "../../crates/core/uno-session-jsonl" }
@@ -51,9 +53,18 @@ uno-skills = { path = "../../crates/core/uno-skills" }
 uno-tools-core = { path = "../../crates/tools/uno-tools-core" }
 uno-transport = { path = "../../crates/core/uno-transport" }
 uno-voice = { path = "../../crates/core/uno-voice" }
+uuid = { workspace = true }
+zeroize = "1"
 tools-exec = { package = "uno-tools-exec", path = "../../crates/tools/uno-tools-exec", optional = true }
 tools-fs = { package = "uno-tools-fs", path = "../../crates/tools/uno-tools-fs", optional = true }
 tools-grep = { package = "uno-tools-grep", path = "../../crates/tools/uno-tools-grep", optional = true }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Security_Cryptography",
+    "Win32_System_Memory",
+] }
 
 [lints]
 workspace = true

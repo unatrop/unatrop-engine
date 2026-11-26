@@ -1,15 +1,12 @@
 //! Local HTTP + WebSocket daemon (`unatropd`) exposing the Unatrop agent core
 //! over `uno-daemon-protocol` for Desktop, Mobile, and CLI clients.
 
-mod agent;
-mod routes;
-mod server;
-mod session;
-mod storage;
-mod tts;
+mod app;
+mod modules;
+mod shared;
 
-pub use agent::config::load_or_create_local_daemon_token;
-pub use server::DaemonState;
+pub use app::DaemonState;
+pub use shared::config::load_or_create_local_daemon_token;
 pub use uno_daemon_protocol as protocol;
 
 use std::{future::Future, net::SocketAddr, path::PathBuf};
@@ -18,7 +15,7 @@ use axum::Router;
 use tokio::net::TcpListener;
 
 pub fn build_router(state: DaemonState) -> Router {
-    routes::router(state)
+    app::build_router(state)
 }
 
 /// Builds the default layered system prompt for a workspace and model.
@@ -26,7 +23,7 @@ pub fn build_default_system_prompt(
     workspace: &std::path::Path,
     model: &str,
 ) -> Result<String, String> {
-    agent::prompts::build_system_prompt(None, workspace, model, &[]).map_err(|e| format!("{e:?}"))
+    shared::prompts::build_system_prompt(None, workspace, model, &[]).map_err(|e| format!("{e:?}"))
 }
 
 pub async fn serve(addr: SocketAddr, auth_token: Option<String>) -> Result<(), std::io::Error> {

@@ -9,7 +9,6 @@ members = [
     "crates/providers/uno-provider-openai",
     "crates/providers/uno-provider-copilot",
     "crates/providers/uno-provider-antigravity",
-    "crates/providers/uno-provider-opencode",
     "crates/tools/uno-tools-core",
     "crates/tools/uno-tools-browser",
     "crates/tools/uno-tools-exec",
@@ -62,7 +61,6 @@ uno-provider-openai = "providers: OpenAI / OpenAI-compatible provider"
 uno-provider-anthropic = "providers: Anthropic Messages API provider"
 uno-provider-copilot = "providers: GitHub Copilot auth and provider"
 uno-provider-antigravity = "providers: Antigravity auth and provider"
-uno-provider-opencode = "providers: OpenCode provider"
 uno-tools-core = "tools: tool traits, registry, and approval policy"
 uno-tools-browser = "tools: host-agnostic browser tools and backend contract"
 uno-tools-fs = "tools: filesystem read/write/patch tools"

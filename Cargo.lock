@@ -2691,11 +2691,14 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "axum",
+ "base64 0.22.1",
  "bytes",
  "futures-util",
+ "http",
  "ogg",
  "opus-decoder",
  "prost",
+ "ring",
  "rusqlite",
  "serde",
  "serde_json",
@@ -2709,10 +2712,10 @@ dependencies = [
  "uno-mcp",
  "uno-protocol",
  "uno-provider",
+ "uno-provider-anthropic",
  "uno-provider-antigravity",
  "uno-provider-copilot",
  "uno-provider-openai",
- "uno-provider-opencode",
  "uno-reqwest-transport",
  "uno-session",
  "uno-session-jsonl",
@@ -2724,6 +2727,8 @@ dependencies = [
  "uno-transport",
  "uno-voice",
  "uuid",
+ "windows-sys 0.61.2",
+ "zeroize",
 ]
 
 [[package]]
@@ -2861,23 +2866,6 @@ dependencies = [
  "tokio",
  "uno-protocol",
  "uno-provider",
- "uno-reqwest-transport",
- "uno-transport",
-]
-
-[[package]]
-name = "uno-provider-opencode"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "bytes",
- "http",
- "serde",
- "serde_json",
- "tokio",
- "uno-protocol",
- "uno-provider",
- "uno-provider-openai",
  "uno-reqwest-transport",
  "uno-transport",
 ]

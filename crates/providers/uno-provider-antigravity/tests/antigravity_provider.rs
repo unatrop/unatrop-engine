@@ -771,3 +771,49 @@ async fn preserves_and_replays_thought_signature_for_tool_calls() {
         "c2tpcF90aG91Z2h0X3NpZ25hdHVyZV92YWxpZGF0b3I="
     );
 }
+
+#[tokio::test]
+async fn gemini_api_provider_uses_goog_api_key_and_parses_stream_and_models() {
+    let models_json =
+        r#"{"models":[{"name":"models/gemini-2.5-pro","displayName":"Gemini 2.5 Pro"}]}"#;
+    let sse = "data: {\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"hello\"}]}}]}\n\n\
+               data: {\"candidates\":[{\"finishReason\":\"STOP\"}],\"usageMetadata\":{\"promptTokenCount\":3,\"candidatesTokenCount\":2,\"totalTokenCount\":5}}\n\n";
+    let transport = Arc::new(MockTransport::new(vec![
+        Response::builder()
+            .status(StatusCode::OK)
+            .body(Bytes::from_static(models_json.as_bytes()))
+            .expect("models response"),
+        sse_response(sse),
+    ]));
+
+    let provider =
+        uno_provider_antigravity::GeminiApiProvider::new("", "test-gemini-key", transport.clone());
+
+    let models = provider.list_models().await.expect("list_models");
+    assert_eq!(models.len(), 1);
+    assert_eq!(models[0].id, "gemini-2.5-pro");
+
+    let mut stream = provider
+        .stream(chat_request("gemini-2.5-pro"))
+        .await
+        .expect("stream");
+    let mut events = Vec::new();
+    while let Some(item) = stream.next().await {
+        events.push(item.expect("stream event"));
+    }
+    assert!(matches!(
+        events.first(),
+        Some(StreamEvent::TextDelta { delta }) if delta == "hello"
+    ));
+
+    let reqs = transport.requests();
+    assert_eq!(reqs.len(), 2);
+    assert_eq!(reqs[0].headers()["x-goog-api-key"], "test-gemini-key");
+    assert_eq!(
+        reqs[1].uri().to_string(),
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse"
+    );
+    let body = body_json(&reqs[1]);
+    assert!(body.get("project").is_none());
+    assert!(body.get("contents").is_some());
+}

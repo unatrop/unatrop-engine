@@ -1,8 +1,12 @@
 mod auth;
+mod gemini_api;
 mod provider;
+mod request;
+mod stream;
 
 pub const DEFAULT_CLOUD_CODE_URL: &str = "https://daily-cloudcode-pa.googleapis.com";
 pub const DEFAULT_PROJECT: &str = "aicode-consumers";
+pub use gemini_api::{DEFAULT_GEMINI_API_BASE_URL, GeminiApiProvider};
 pub const COMPILE_TIME_OAUTH_CLIENT_ID: Option<&str> = option_env!("ANTIGRAVITY_OAUTH_CLIENT_ID");
 pub const COMPILE_TIME_OAUTH_CLIENT_SECRET: Option<&str> =
     option_env!("ANTIGRAVITY_OAUTH_CLIENT_SECRET");
@@ -37,4 +41,5 @@ pub(crate) const DEFAULT_USER_AGENT: &str =
 pub use auth::{AntigravityAccess, AntigravityAuth};
 pub use provider::{
     AntigravityAccount, AntigravityModel, AntigravityProvider, antigravity_request_body,
+    gemini_request_body,
 };

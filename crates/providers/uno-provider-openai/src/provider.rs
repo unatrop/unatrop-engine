@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use bytes::Bytes;
 use http::Request;
-use http::header::{ACCEPT, AUTHORIZATION};
+use http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use protocol::{CompletionRequest, StreamEvent};
 use provider::{
     BoxStream, ModelCatalog, ModelInfo, Provider, ProviderError, read_checked_body, send_with_retry,
@@ -11,7 +11,9 @@ use provider::{
 use serde::Deserialize;
 use transport::HttpTransport;
 
-use crate::stream_chat_completions_with_cache;
+use crate::{
+    openai_request_body_with_cache, send_openai_stream, stream_chat_completions_with_cache,
+};
 
 /// Стандартный провайдер OpenAI-совместимого `/chat/completions`
 pub struct OpenAiCompatibleProvider {
@@ -21,6 +23,7 @@ pub struct OpenAiCompatibleProvider {
     api_key: String,
     extra_headers: Vec<(String, String)>,
     prompt_cache: Option<bool>,
+    no_auth: bool,
 }
 
 impl OpenAiCompatibleProvider {
@@ -38,7 +41,14 @@ impl OpenAiCompatibleProvider {
             api_key: api_key.into(),
             extra_headers: Vec::new(),
             prompt_cache: None,
+            no_auth: false,
         }
+    }
+
+    /// Отключает отправку `Authorization: Bearer ...` (для локальных Ollama/LM Studio без ключа).
+    pub fn no_auth(mut self, enabled: bool) -> Self {
+        self.no_auth = enabled;
+        self
     }
 
     /// Добавляет статический HTTP-заголовок ко всем запросам
@@ -57,9 +67,10 @@ impl OpenAiCompatibleProvider {
     pub async fn list_models(&self) -> Result<Vec<ModelInfo>, ProviderError> {
         let url = format!("{}/models", self.base_url);
         let response = send_with_retry(self.transport.as_ref(), || {
-            let mut builder = Request::get(url.as_str())
-                .header(AUTHORIZATION, format!("Bearer {}", self.api_key))
-                .header(ACCEPT, "application/json");
+            let mut builder = Request::get(url.as_str()).header(ACCEPT, "application/json");
+            if !self.no_auth {
+                builder = builder.header(AUTHORIZATION, format!("Bearer {}", self.api_key));
+            }
             for (k, v) in &self.extra_headers {
                 builder = builder.header(k.as_str(), v.as_str());
             }
@@ -118,6 +129,22 @@ impl Provider for OpenAiCompatibleProvider {
             .iter()
             .map(|(name, value)| (name.as_str(), value.as_str()))
             .collect();
+
+        if self.no_auth {
+            let endpoint = format!("{}/chat/completions", self.base_url);
+            let payload = openai_request_body_with_cache(&request, self.prompt_cache)?;
+            let body = serde_json::to_vec(&payload).map_err(|error| {
+                ProviderError::InvalidResponse(format!("Failed to serialize request: {error}"))
+            })?;
+            let mut builder = Request::post(endpoint).header(CONTENT_TYPE, "application/json");
+            for (name, value) in &headers {
+                builder = builder.header(*name, *value);
+            }
+            let http_request = builder.body(Bytes::from(body)).map_err(|error| {
+                ProviderError::InvalidResponse(format!("Failed to build HTTP request: {error}"))
+            })?;
+            return send_openai_stream(self.transport.as_ref(), http_request).await;
+        }
 
         stream_chat_completions_with_cache(
             self.transport.as_ref(),

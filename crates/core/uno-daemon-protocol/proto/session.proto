@@ -29,6 +29,7 @@ message CreateSessionRequest {
   optional uint32 max_tokens = 21;
   optional ThinkingLevel thinking_level = 22;
   bool disable_tools = 23;
+  optional string account_id = 24;
 }
 
 message CreateSessionResponse {
